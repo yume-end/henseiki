@@ -1,5 +1,5 @@
 import { AwardIcon, BookOpenCheckIcon, CheckCircle2Icon, RotateCcwIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Page() {
   let [index, setIndex] = useState(0)
@@ -10,6 +10,12 @@ export default function Page() {
   let quiz = Quizzes[index]
   let isCorrect = selected === quiz.answer
   let progress = Math.round(((index + 1) / Quizzes.length) * 100)
+
+  useEffect(() => {
+    if (selected === null || !isCorrect) return
+
+    speakPraise(quiz.praise)
+  }, [isCorrect, quiz.praise, selected])
 
   function choose(option: number) {
     if (selected !== null) return
@@ -23,11 +29,13 @@ export default function Page() {
   }
 
   function next() {
+    cancelSpeech()
     setIndex((index + 1) % Quizzes.length)
     setSelected(null)
   }
 
   function reset() {
+    cancelSpeech()
     setIndex(0)
     setSelected(null)
     setScore(0)
@@ -225,6 +233,39 @@ function getNavClass(
   }
 
   return `${base} border-stone-200 bg-white text-stone-700 hover:bg-stone-100`
+}
+
+function speakPraise(text: string) {
+  if (typeof window === 'undefined') return
+  if (!('speechSynthesis' in window)) return
+
+  let synth = window.speechSynthesis
+  synth.cancel()
+
+  let utterance = new SpeechSynthesisUtterance(`やったね。${text}`)
+  let voices = synth.getVoices()
+  let voice =
+    voices.find((item) => item.lang === 'ja-JP' && /female|woman|f|japanese/i.test(item.name)) ??
+    voices.find((item) => item.lang.startsWith('ja')) ??
+    null
+
+  utterance.lang = 'ja-JP'
+  utterance.rate = 1.02
+  utterance.pitch = 1.35
+  utterance.volume = 1
+
+  if (voice) {
+    utterance.voice = voice
+  }
+
+  synth.speak(utterance)
+}
+
+function cancelSpeech() {
+  if (typeof window === 'undefined') return
+  if (!('speechSynthesis' in window)) return
+
+  window.speechSynthesis.cancel()
 }
 
 const OptionLabels = ['ア', 'イ', 'ウ', 'エ']
