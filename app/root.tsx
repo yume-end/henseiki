@@ -3,11 +3,11 @@ import './tailwind.css'
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Website Starter</title>
+        <title>情報2 確認クイズ</title>
         <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
         <Links />
       </head>
